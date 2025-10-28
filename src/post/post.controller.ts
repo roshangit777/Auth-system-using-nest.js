@@ -14,14 +14,19 @@ import { PostService } from './post.service';
 import { PostDto } from './dto/post-dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { FindPostsQueryDto } from './dto/find-posts-query.dto';
+import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface';
+import { Posts } from './post.interfaces';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Get()
-  getAllPost() {
-    return this.postService.findAll();
+  getAllPost(
+    @Query() query: FindPostsQueryDto,
+  ): Promise<PaginatedResponse<Posts>> {
+    return this.postService.findAll(query);
   }
 
   @Get(':id')

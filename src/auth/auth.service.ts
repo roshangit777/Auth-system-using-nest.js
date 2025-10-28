@@ -10,6 +10,7 @@ import { RegisterUserDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Roles } from './decorators/roles.decorator';
 
 @Injectable()
 export class AuthService {
@@ -70,7 +71,7 @@ export class AuthService {
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const newPayload = { sub: 2, email: 'r1@gmail.com', role: 'admin' };
+    /* const newPayload = { sub: 2, email: 'r1@gmail.com', role: 'admin' }; */
     /* console.log('password:', await this.hashPassword(userData.password));
     console.log('token:', await this.jwtService.signAsync(newPayload)); */
     const { password, ...result } = user;
@@ -80,11 +81,40 @@ export class AuthService {
     };
   }
 
-  async hashPassword(password: string): Promise<string> {
+  async loginAdmin(userData: LoginUserDto) {
+    const user = await this.userRepository.findOne({
+      where: { email: userData.email },
+    });
+
+    if (
+      !user ||
+      !(await this.comparePasswords(userData.password, user.password))
+    ) {
+      throw new UnauthorizedException('Email or password is invalid');
+    }
+    console.log(user);
+    if (user.role !== UserRole.ADMIN) {
+      {
+        throw new UnauthorizedException('Insufficient permission');
+      }
+    }
+
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    /* const newPayload = { sub: 2, email: 'r1@gmail.com', role: 'admin' }; */
+    /* console.log('password:', await this.hashPassword(userData.password));
+    console.log('token:', await this.jwtService.signAsync(newPayload)); */
+    const { password, ...result } = user;
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+      user: result,
+    };
+  }
+
+  private async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 10); // hashes the plain password
   }
 
-  async comparePasswords(
+  private async comparePasswords(
     plainPassword: string,
     hashedPassword: string,
   ): Promise<boolean> {
