@@ -10,13 +10,14 @@ import { RegisterUserDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { Roles } from './decorators/roles.decorator';
+import { UserEventsService } from 'src/events/user-event.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Users) private userRepository: Repository<Users>,
     private jwtService: JwtService,
+    private readonly userEventService: UserEventsService,
   ) {}
 
   async userRegister(userData: RegisterUserDto) {
@@ -32,6 +33,10 @@ export class AuthService {
       password: await this.hashPassword(userData.password),
     });
     await this.userRepository.save(user);
+
+    //emit the user registere event
+    this.userEventService.emitUserRegistered(user);
+
     const { password, ...result } = user;
     return {
       message: 'Register is completed',

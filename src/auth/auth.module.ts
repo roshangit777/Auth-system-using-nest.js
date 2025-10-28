@@ -4,6 +4,7 @@ import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { EventsModule } from 'src/events/events.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
       secret: 'jwtsecret',
       signOptions: { expiresIn: '10000s' },
     }),
+    EventsModule,
   ],
   providers: [AuthService],
   controllers: [AuthController],

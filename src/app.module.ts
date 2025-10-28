@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HelloModule } from './hello/hello.module';
@@ -14,6 +14,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { File } from './file-upload/entity/cloudinary.entity';
+import { EventsModule } from './events/events.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { LoggerMiddleware } from './middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -41,12 +44,24 @@ import { File } from './file-upload/entity/cloudinary.entity';
       entities: [Posts, Users, File],
       synchronize: true,
     }),
+    EventEmitterModule.forRoot({
+      global: true,
+      wildcard: false,
+      maxListeners: 20,
+      verboseMemoryLeak: true,
+    }),
     HelloModule,
     UserModule,
     AuthModule,
     FileUploadModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // apply the middlewares for all the routes
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
