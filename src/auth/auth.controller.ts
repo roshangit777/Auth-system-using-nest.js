@@ -7,6 +7,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from './entities/user.entity';
 import { RolesGuard } from './guards/roles.guard';
+import { LoginThrottlerGuard } from './guards/login-throttler.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +18,7 @@ export class AuthController {
     return await this.authServices.userRegister(data);
   }
 
+  @UseGuards(LoginThrottlerGuard)
   @Post('user/login')
   async userLogin(@Body() data: LoginUserDto) {
     return await this.authServices.loginUser(data);
@@ -35,8 +37,8 @@ export class AuthController {
     return await this.authServices.adminRegister(data);
   }
 
-  /*  @Post('admin/login')
+  @Post('admin-login')
   async adminLogin(@Body() data: LoginUserDto) {
-    return await this.authServices.loginUser(data);
-  } */
+    return await this.authServices.loginAdmin(data);
+  }
 }

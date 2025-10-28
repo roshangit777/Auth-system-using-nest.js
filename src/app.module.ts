@@ -10,9 +10,26 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Posts } from './post/entity/post.entity';
 import { AuthModule } from './auth/auth.module';
 import { Users } from './auth/entities/user.entity';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
+import { FileUploadModule } from './file-upload/file-upload.module';
+import { File } from './file-upload/entity/cloudinary.entity';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 5,
+        },
+      ],
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 30000,
+      max: 100,
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig],
@@ -21,12 +38,13 @@ import { Users } from './auth/entities/user.entity';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: 'postgresql://postgres:0000@db.oocgxjsamsnuzfkdguge.supabase.co:5432/postgres',
-      entities: [Posts, Users],
+      entities: [Posts, Users, File],
       synchronize: true,
     }),
     HelloModule,
     UserModule,
     AuthModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

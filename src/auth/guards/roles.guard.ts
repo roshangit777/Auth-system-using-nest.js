@@ -8,10 +8,16 @@ import { Reflector } from '@nestjs/core';
 import { UserRole } from '../entities/user.entity';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
-interface Payload {
+interface JwtPayload {
   sub: number;
   email: string;
   role: string;
+  iat: number;
+  exp: number;
+}
+
+interface AuthenticatedRequest extends Request {
+  user?: JwtPayload;
 }
 
 /*Workflow
@@ -32,15 +38,15 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) {
       return true;
     }
-    const { user } = context.switchToHttp().getRequest();
+    const { user } = context.switchToHttp().getRequest<AuthenticatedRequest>();
     if (!user) {
       throw new ForbiddenException('User not authenticated');
     }
-
-    const hasRequiredRole = requiredRoles.some((role) => user === role);
-    /* if (!hasRequiredRole) {
+    const hasRequiredRole = requiredRoles.some((role) => role === user.role);
+    console.log(requiredRoles);
+    if (!hasRequiredRole) {
       throw new ForbiddenException('Insufficient permission');
-    } */
+    }
     return true;
   }
 }
