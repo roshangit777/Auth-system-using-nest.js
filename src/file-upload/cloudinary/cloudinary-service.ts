@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
-import * as streamifier from 'streamifier';
+/* import * as streamifier from 'streamifier'; */
+import fs from 'fs';
 
 @Injectable()
 export class CloudinaryService {
   constructor(@Inject('CLOUDINARY') private readonly clodinary: any) {}
 
-  uploadFile(file: Express.Multer.File): Promise<UploadApiResponse> {
+  uploadFile(filePath: string): Promise<UploadApiResponse> {
     return new Promise<UploadApiResponse>((resolve, reject) => {
       const uploadStream = this.clodinary.uploader.upload_stream(
         {
@@ -19,7 +20,7 @@ export class CloudinaryService {
         },
       );
       //convert the file buffer to a readable string and then it will pipe to the uplaod stream
-      streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      fs.createReadStream(filePath).pipe(uploadStream);
     });
   }
 

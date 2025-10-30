@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { EventsModule } from 'src/events/events.module';
+import { LoginHistory } from 'src/events/entity/login-history.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Users]),
+    TypeOrmModule.forFeature([Users, LoginHistory]),
     JwtModule.register({
       global: true,
       secret: 'jwtsecret',
