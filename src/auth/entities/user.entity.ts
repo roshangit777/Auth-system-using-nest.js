@@ -1,3 +1,4 @@
+import { LoginHistory } from 'src/events/entity/login-history.entity';
 import { Posts } from 'src/post/entity/post.entity';
 import {
   Column,
@@ -40,4 +41,7 @@ export class Users {
 
   @CreateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => LoginHistory, (login) => login.user)
+  loginHistory: LoginHistory[];
 }

@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import type { UserRegisteredEvent } from '../user-event.service';
+import type {
+  UserLoginHistoryEven,
+  UserRegisteredEvent,
+} from '../user-event.service';
 
 // event listerners => respond to the events emitted by eventemitter
 @Injectable()
@@ -14,6 +17,14 @@ export class UserRegisteredListener {
     //send a email or verify to the customers
     this.logger.log(
       `Welcome, ${user.email}! Your Account created at ${timeStamp.toISOString()}`,
+    );
+  }
+
+  @OnEvent('user.loginRecord')
+  handleUserLoginRecord(event: UserLoginHistoryEven): void {
+    const { user, loginTime } = event;
+    this.logger.log(
+      `Welcome, ${user}! Your Account created at ${loginTime.toISOString()}`,
     );
   }
 }

@@ -17,6 +17,7 @@ import { File } from './file-upload/entity/cloudinary.entity';
 import { EventsModule } from './events/events.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { LoginHistory } from './events/entity/login-history.entity';
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: 'postgresql://postgres:0000@db.oocgxjsamsnuzfkdguge.supabase.co:5432/postgres',
-      entities: [Posts, Users, File],
+      entities: [Posts, Users, File, LoginHistory],
       synchronize: true,
     }),
     EventEmitterModule.forRoot({

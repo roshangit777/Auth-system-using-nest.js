@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -11,11 +12,14 @@ import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserEventsService } from 'src/events/user-event.service';
+import { LoginHistory } from 'src/events/entity/login-history.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Users) private userRepository: Repository<Users>,
+    @InjectRepository(LoginHistory)
+    private loginUserHistoryRepository: Repository<LoginHistory>,
     private jwtService: JwtService,
     private readonly userEventService: UserEventsService,
   ) {}
@@ -79,6 +83,7 @@ export class AuthService {
     /* const newPayload = { sub: 2, email: 'r1@gmail.com', role: 'admin' }; */
     /* console.log('password:', await this.hashPassword(userData.password));
     console.log('token:', await this.jwtService.signAsync(newPayload)); */
+    await this.userEventService.recordLogin(user.id);
     const { password, ...result } = user;
     return {
       access_token: await this.jwtService.signAsync(payload),
@@ -108,11 +113,30 @@ export class AuthService {
     /* const newPayload = { sub: 2, email: 'r1@gmail.com', role: 'admin' }; */
     /* console.log('password:', await this.hashPassword(userData.password));
     console.log('token:', await this.jwtService.signAsync(newPayload)); */
+    await this.userEventService.recordLogin(user.id);
     const { password, ...result } = user;
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: result,
     };
+  }
+
+  async getUserLoginHistory(userId: number | undefined): Promise<any[]> {
+    if (!userId) {
+      return await this.loginUserHistoryRepository.find({
+        relations: ['user'],
+      });
+    } else {
+      const history = await this.loginUserHistoryRepository.find({
+        where: { user: { id: userId } },
+        /* relations: ['user'], */
+        select: ['loginTime'],
+      });
+      if (!history) {
+        throw new NotFoundException(`Login record of the ${userId} not found`);
+      }
+      return history.map((item) => item.loginTime);
+    }
   }
 
   private async hashPassword(password: string): Promise<string> {
