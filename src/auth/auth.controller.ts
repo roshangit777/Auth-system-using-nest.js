@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register.dto';
 import { LoginUserDto } from './dto/login.dto';
@@ -35,8 +27,10 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('profile')
-  getProfile(@CurrentUser() user: any) {
-    return user;
+  getProfile(
+    @CurrentUser() user: { sub: number; email: string; role: string },
+  ) {
+    return { id: user.sub, email: user.email, role: user.role };
   }
 
   @Post('create-admin')
@@ -56,7 +50,7 @@ export class AuthController {
   @UseGuards(AuthGuard, RolesGuard)
   async getAllUserLoginHistory(
     @Query('id') id?: number,
-  ): Promise<LoginHistory[]> {
+  ): Promise<LoginHistory[] | string[]> {
     const userId = id ? Number(id) : undefined;
     return await this.authServices.getUserLoginHistory(userId);
   }

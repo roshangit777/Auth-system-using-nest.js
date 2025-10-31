@@ -102,7 +102,6 @@ export class AuthService {
     ) {
       throw new UnauthorizedException('Email or password is invalid');
     }
-    console.log(user);
     if (user.role !== UserRole.ADMIN) {
       {
         throw new UnauthorizedException('Insufficient permission');
