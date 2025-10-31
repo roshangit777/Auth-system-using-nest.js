@@ -18,6 +18,7 @@ import { EventsModule } from './events/events.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { LoginHistory } from './events/entity/login-history.entity';
+import cors from 'cors';
 
 @Module({
   imports: [
@@ -62,6 +63,10 @@ import { LoginHistory } from './events/entity/login-history.entity';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    //cors configuration only for auth route
+    consumer
+      .apply(cors({ origin: 'http://localhost:3000', credentials: true }))
+      .forRoutes('auth');
     // apply the middlewares for all the routes
     consumer.apply(LoggerMiddleware).forRoutes('*');
   }

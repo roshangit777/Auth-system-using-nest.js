@@ -4,12 +4,30 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import cluster from 'cluster';
 import os from 'os';
+/* import cors from 'cors'; */
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'debug', 'log', 'verbose', 'warn'],
   });
+
+  //cors configuration
+  app.enableCors({
+    origin: ['https://localhost:5432/'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    allowedHeaders: 'Content-Type, Authorization',
+  });
+
+  // Apply CORS only for a specific route (/auth)
+  /* app.use(
+    '/auth',
+    cors({
+      origin: 'http://localhost:3000',
+      credentials: true,
+    }),
+  ); */
 
   app.useGlobalPipes(
     new ValidationPipe({

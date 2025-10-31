@@ -1,0 +1,6 @@
+✅ Option 1: Run a single file
+npm run test -- src/auth/auth.service.spec.ts
+
+✅ Option 2: Run tests that match a name pattern
+npm run test -- -t AuthService
+That -t flag (short for --testNamePattern) runs tests that contain AuthService in their name or description.
